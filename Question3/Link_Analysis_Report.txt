@@ -1,0 +1,146 @@
+================================================================
+    QUESTION 3 – FILE SYSTEM AND LINK ANALYSIS REPORT
+    Date: July 3, 2026
+    User: shahikbalahmed
+================================================================
+
+----------------------------------------------------------------
+COMMAND 1: Create original file
+----------------------------------------------------------------
+$ echo "Original project source file" > original.txt
+
+EXPLANATION:
+A regular text file named original.txt was created containing sample
+project data. This file will serve as the base for creating hard and
+symbolic links to compare their behavior.
+
+----------------------------------------------------------------
+COMMAND 2: Create hard link
+----------------------------------------------------------------
+$ ln original.txt hardlink.txt
+
+EXPLANATION:
+The ln command (without -s) creates a hard link. Both original.txt
+and hardlink.txt now point to the same inode on disk, sharing the
+exact same data blocks and metadata.
+
+----------------------------------------------------------------
+COMMAND 3: Create symbolic link
+----------------------------------------------------------------
+$ ln -s original.txt symlink.txt
+
+EXPLANATION:
+The ln -s command creates a symbolic (soft) link. symlink.txt is a
+separate file that stores the path "original.txt" as its content,
+rather than pointing directly to the same inode.
+
+----------------------------------------------------------------
+COMMAND 4: ls -li (Inode comparison – BEFORE deletion)
+----------------------------------------------------------------
+$ ls -li
+42844877 -rw-r--r--@ 2 shahikbalahmed  staff  29  original.txt
+42844877 -rw-r--r--@ 2 shahikbalahmed  staff  29  hardlink.txt
+42844880 lrwxr-xr-x@ 1 shahikbalahmed  staff  12  symlink.txt -> original.txt
+
+EXPLANATION:
+The ls -li output shows inode numbers. original.txt and hardlink.txt
+share inode 42844877 with link count 2, proving they are the same
+file. symlink.txt has a different inode (42844880) and type "l"
+(link), confirming it is a separate filesystem entry.
+
+----------------------------------------------------------------
+COMMAND 5: stat (Detailed metadata)
+----------------------------------------------------------------
+$ stat -f "File: %N | Inode: %i | Links: %l | Size: %z" original.txt hardlink.txt symlink.txt
+
+File: original.txt  | Inode: 42844877 | Links: 2 | Size: 29
+File: hardlink.txt  | Inode: 42844877 | Links: 2 | Size: 29
+File: symlink.txt   | Inode: 42844880 | Links: 1 | Size: 12
+
+EXPLANATION:
+The stat command confirms hard links share the same inode and link
+count (2), while the symlink has its own inode (42844880) with link
+count 1. The symlink's size (12 bytes) equals the length of the path
+string "original.txt".
+
+----------------------------------------------------------------
+COMMAND 6: Read all three files (BEFORE deletion)
+----------------------------------------------------------------
+$ cat original.txt   → Original project source file
+$ cat hardlink.txt   → Original project source file
+$ cat symlink.txt    → Original project source file
+
+EXPLANATION:
+All three paths successfully returned the same content before any
+deletion, demonstrating that both link types provide valid access
+to the original data while the original file still exists.
+
+----------------------------------------------------------------
+COMMAND 7: Delete original file
+----------------------------------------------------------------
+$ rm original.txt
+
+EXPLANATION:
+The original file entry was removed from the directory. Because a
+hard link still references inode 42844877, the actual data on disk
+is preserved until all hard links are deleted.
+
+----------------------------------------------------------------
+COMMAND 8: ls -li (AFTER deletion)
+----------------------------------------------------------------
+$ ls -li
+42844877 -rw-r--r--@ 1 shahikbalahmed  staff  29  hardlink.txt
+42844880 lrwxr-xr-x@ 1 shahikbalahmed  staff  12  symlink.txt -> original.txt
+
+EXPLANATION:
+After deletion, original.txt is gone. hardlink.txt remains with
+inode 42844877 but link count dropped to 1. symlink.txt still
+exists but its target path "original.txt" no longer exists.
+
+----------------------------------------------------------------
+COMMAND 9: Test access after deletion
+----------------------------------------------------------------
+$ cat hardlink.txt   → Original project source file  (SUCCESS)
+$ cat symlink.txt    → No such file or directory     (FAILED)
+$ readlink symlink.txt → original.txt
+
+EXPLANATION:
+The hard link still works because the inode and data blocks survive
+as long as at least one hard link exists. The symbolic link is
+broken (dangling) because it references a filename, not an inode,
+and that filename no longer exists in the directory.
+
+================================================================
+COMPARISON: HARD LINK vs SYMBOLIC LINK
+================================================================
+| Property          | Hard Link              | Symbolic Link          |
+|-------------------|------------------------|------------------------|
+| Inode             | Same as original       | Different inode        |
+| Link type         | Direct inode reference | Path pointer to file   |
+| Cross-filesystem  | No                     | Yes                    |
+| Link to directory | No (usually)           | Yes                    |
+| After original    | Data still accessible  | Link becomes broken    |
+|   deleted         | via hard link          | (dangling symlink)     |
+| Link count        | Increments/decrements    | Not affected           |
+| Size              | Same as original file  | Size of path string    |
+
+================================================================
+CONCLUSIONS
+================================================================
+1. Hard links are multiple directory entries pointing to the same
+   inode; deleting one name does not destroy data while other hard
+   links exist.
+2. Symbolic links are indirect references storing a file path; they
+   break when the target path is removed, even if data still exists
+   via a hard link.
+3. Hardcoded link count (shown by ls -li) tracks hard links only;
+   symlinks do not increment the target's link count.
+4. Hard links cannot span filesystem boundaries; symlinks can point
+   across partitions and to directories.
+5. For backup and redundancy within the same filesystem, hard links
+   are safer; symlinks are better for shortcuts and cross-directory
+   references where portability matters.
+
+================================================================
+END OF REPORT
+================================================================

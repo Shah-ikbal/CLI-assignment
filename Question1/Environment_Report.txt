@@ -1,0 +1,110 @@
+================================================================
+    QUESTION 1 – LINUX ENVIRONMENT VERIFICATION REPORT
+    Date: July 3, 2026
+    User: shahikbalahmed
+================================================================
+
+----------------------------------------------------------------
+COMMAND 1: whoami
+----------------------------------------------------------------
+$ whoami
+shahikbalahmed
+
+EXPLANATION:
+The whoami command prints the effective username of the currently
+logged-in user. I observed that my account username is "shahikbalahmed",
+confirming I am authenticated and can proceed with environment checks.
+
+----------------------------------------------------------------
+COMMAND 2: id
+----------------------------------------------------------------
+$ id
+uid=501(shahikbalahmed) gid=20(staff) groups=20(staff),12(everyone),
+61(localaccounts),79(_appserverusr),80(admin),81(_appserveradm),
+98(_lpadmin),701(com.apple.sharepoint.group.1),33(_appstore),
+100(_lpoperator),204(_developer),250(_analyticsusers),
+395(com.apple.access_ftp),398(com.apple.access_screensharing),
+399(com.apple.access_ssh),400(com.apple.access_remote_ae)
+
+EXPLANATION:
+The id command displays the real user ID (UID), group ID (GID), and
+all supplementary groups. My UID is 501 with primary group "staff".
+I am also a member of the "admin" group (GID 80), which grants
+elevated privileges on this system.
+
+----------------------------------------------------------------
+COMMAND 3: echo $SHELL
+----------------------------------------------------------------
+$ echo $SHELL
+/bin/zsh
+
+EXPLANATION:
+This command reveals the current login shell environment variable.
+The system is using Z shell (zsh) as the default interactive shell,
+which is the standard shell on modern macOS systems.
+
+----------------------------------------------------------------
+COMMAND 4: pwd
+----------------------------------------------------------------
+$ pwd
+/Users/shahikbalahmed/Desktop/projects/CLI lab assignment
+
+EXPLANATION:
+The pwd (print working directory) command shows the absolute path of
+the current directory. I am working inside the CLI lab assignment
+project folder on the Desktop.
+
+----------------------------------------------------------------
+COMMAND 5: ls -la
+----------------------------------------------------------------
+$ ls -la
+total 0
+drwxr-xr-x   7 shahikbalahmed  staff  224  3 Jul 23:27 .
+drwxr-xr-x@ 28 shahikbalahmed  staff  896  3 Jul 23:25 ..
+drwxr-xr-x@  2 shahikbalahmed  staff   64  3 Jul 23:27 Question1
+drwxr-xr-x@  2 shahikbalahmed  staff   64  3 Jul 23:27 Question2
+drwxr-xr-x@  2 shahikbalahmed  staff   64  3 Jul 23:27 Question3
+drwxr-xr-x@  2 shahikbalahmed  staff   64  3 Jul 23:27 Question4
+drwxr-xr-x@  2 shahikbalahmed  staff   64  3 Jul 23:27 Question5
+
+EXPLANATION:
+The ls -la command lists all files and directories (including hidden
+ones) with detailed permissions, ownership, size, and timestamps.
+The workspace contains five Question folders prepared for the lab
+assignment, each with standard read/write/execute permissions for
+the owner.
+
+----------------------------------------------------------------
+COMMAND 6: ping -c 3 8.8.8.8
+----------------------------------------------------------------
+$ ping -c 3 8.8.8.8
+PING 8.8.8.8 (8.8.8.8): 56 data bytes
+64 bytes from 8.8.8.8: icmp_seq=0 ttl=118 time=10.378 ms
+64 bytes from 8.8.8.8: icmp_seq=1 ttl=118 time=12.632 ms
+64 bytes from 8.8.8.8: icmp_seq=2 ttl=118 time=10.711 ms
+
+--- 8.8.8.8 ping statistics ---
+3 packets transmitted, 3 packets received, 0.0% packet loss
+round-trip min/avg/max/stddev = 10.378/11.240/12.632/0.993 ms
+
+EXPLANATION:
+The ping command sends ICMP echo requests to verify network
+connectivity. All 3 packets to Google's DNS (8.8.8.8) were received
+with 0% packet loss and ~11 ms average latency, confirming active
+and stable internet connectivity.
+
+================================================================
+SUMMARY OF OBSERVATIONS (3–5 lines)
+================================================================
+1. User "shahikbalahmed" (UID 501) is logged in with admin group
+   membership, confirming sufficient privileges for lab tasks.
+2. The default shell is /bin/zsh and the working directory is the
+   CLI lab assignment folder on the Desktop.
+3. The workspace contains five organized Question subdirectories.
+4. Network connectivity to 8.8.8.8 is fully operational with no
+   packet loss, so external resources are reachable.
+5. The Linux/macOS environment is verified and ready for use.
+
+================================================================
+END OF REPORT
+================================================================

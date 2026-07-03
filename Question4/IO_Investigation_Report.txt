@@ -1,0 +1,139 @@
+================================================================
+    QUESTION 4 – FILE ACCESS AND I/O INVESTIGATION REPORT
+    Date: July 3, 2026
+    User: shahikbalahmed
+================================================================
+
+----------------------------------------------------------------
+COMMAND 1: Create application log file
+----------------------------------------------------------------
+$ echo "Application log entry 1" > app.log
+$ echo "Application log entry 2" >> app.log
+
+EXPLANATION:
+A sample log file was created to simulate an application experiencing
+logging issues. The >> operator appends without overwriting, which is
+typical behavior for production log files.
+
+----------------------------------------------------------------
+COMMAND 2: lsof -p $$ (Open files in current shell)
+----------------------------------------------------------------
+$ lsof -p $$
+COMMAND   PID    USER   FD   TYPE  DEVICE  NAME
+zsh     15759  shahikbalahmed  cwd  DIR  ...  /Question4
+zsh     15759  shahikbalahmed  txt  REG  ...  /bin/zsh
+zsh     15759  shahikbalahmed    0u unix ...  (stdin)
+zsh     15759  shahikbalahmed    1u unix ...  (stdout)
+zsh     15759  shahikbalahmed    2u unix ...  (stderr)
+zsh     15759  shahikbalahmed   10r  CHR  ...  /dev/null
+
+EXPLANATION:
+lsof (list open files) reveals every file descriptor used by the
+current shell process. FD 0, 1, 2 are standard input, output, and
+error streams. The cwd entry shows the working directory is also
+tracked as an open file descriptor.
+
+----------------------------------------------------------------
+COMMAND 3: ls -la /dev/fd/ (File descriptor directory)
+----------------------------------------------------------------
+$ ls -la /dev/fd/
+total 26
+dr-xr-xr-x  1 root  wheel     0  /dev/fd/.
+srw-rw-rw-  0 user  staff     0  /dev/fd/0   (stdin)
+--w-------  1 user  staff  1307  /dev/fd/1   (stdout)
+--w-------  1 user  staff  1307  /dev/fd/2   (stderr)
+s-w--w--w-  0 user  staff     0  /dev/fd/3
+srw-rw-rw-  0 user  staff     0  /dev/fd/4
+
+EXPLANATION:
+/dev/fd/ is a virtual directory where each entry corresponds to an
+open file descriptor in the current process. FD 0 is a socket (stdin),
+FD 1 and 2 are write-only pipes (stdout/stderr). This confirms Linux
+treats everything as a file, including I/O streams.
+
+----------------------------------------------------------------
+COMMAND 4: Output redirection (stdout and stderr separately)
+----------------------------------------------------------------
+$ echo "stdout message" > stdout.txt 2> stderr.txt
+$ echo "error message" >&2 2>> stderr.txt
+
+stdout.txt contents:
+  stdout message
+  combined test
+
+stderr.txt contents:
+  error message
+
+EXPLANATION:
+The > operator redirects stdout to a file (overwriting), while 2>
+redirects stderr separately. This allows applications to log normal
+output and errors to different files, which is essential for debugging
+logging issues in production systems.
+
+----------------------------------------------------------------
+COMMAND 5: Redirect stdout and stderr to separate files
+----------------------------------------------------------------
+$ (echo "normal output"; echo "error output" >&2) > combined_out.txt 2> combined_err.txt
+
+combined_out.txt: normal output
+combined_err.txt: error output
+
+EXPLANATION:
+By grouping commands and redirecting both streams independently,
+we can capture standard output and error output into separate files
+simultaneously, mimicking how logging frameworks separate log levels.
+
+----------------------------------------------------------------
+COMMAND 6: ulimit -a (Resource limits)
+----------------------------------------------------------------
+$ ulimit -a
+-t: cpu time (seconds)              unlimited
+-f: file size (blocks)              unlimited
+-d: data seg size (kbytes)          unlimited
+-s: stack size (kbytes)             8176
+-c: core file size (blocks)         0
+-v: address space (kbytes)          unlimited
+-l: locked-in-memory size (kbytes)  unlimited
+-u: processes                       1333
+-n: file descriptors                1048575
+
+EXPLANATION:
+ulimit displays per-process resource limits set by the OS. The file
+descriptor limit (-n) is 1,048,575, meaning this shell can open over
+one million files simultaneously. Core dumps are disabled (size 0),
+which is a common production security setting.
+
+----------------------------------------------------------------
+HOW LINUX MANAGES FILE I/O
+----------------------------------------------------------------
+1. Everything-is-a-file model: Regular files, directories, devices,
+   sockets, and pipes are all accessed through file descriptors (FDs).
+2. Standard streams: FD 0 (stdin), FD 1 (stdout), FD 2 (stderr) are
+   inherited by every process and can be redirected with >, >>, 2>, &>.
+3. Kernel buffer cache: Read/write operations go through the kernel's
+   page cache for performance; data is flushed to disk asynchronously.
+4. Open file table: The kernel maintains a per-process table of open
+   FDs; lsof and /proc/<pid>/fd expose this on Linux systems.
+5. Resource limits: ulimit prevents runaway processes from exhausting
+   system resources like file descriptors, memory, or CPU time.
+6. Redirection at shell level: The shell sets up FD duplication before
+   exec-ing a program, so applications write to files without code changes.
+
+================================================================
+TECHNICAL OBSERVATIONS
+================================================================
+1. The current shell (zsh) has stdin/stdout/stderr connected via
+   unix sockets rather than terminal devices in this environment.
+2. Separating stdout and stderr redirection is critical for log analysis
+   pipelines that process normal logs and error logs differently.
+3. The high FD limit (1,048,575) indicates a modern macOS/Linux system
+   configured for server-grade concurrent I/O workloads.
+4. /dev/fd/ provides a convenient way to reference open descriptors
+   by number, enabling advanced shell scripting patterns.
+5. Logging issues often stem from permission errors on log files,
+   full disk space, or incorrect redirection — all diagnosable with
+   lsof, df, and ls -la on the log directory.
+
+================================================================
+END OF REPORT
+================================================================

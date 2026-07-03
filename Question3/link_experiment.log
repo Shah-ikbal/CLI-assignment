@@ -1,0 +1,25 @@
+=== INITIAL STATE ===
+total 24
+42844877 -rw-r--r--@ 2 shahikbalahmed  staff  29  3 Jul 23:28 hardlink.txt
+42844881 -rw-r--r--@ 1 shahikbalahmed  staff  22  3 Jul 23:28 link_experiment.log
+42844877 -rw-r--r--@ 2 shahikbalahmed  staff  29  3 Jul 23:28 original.txt
+42844880 lrwxr-xr-x@ 1 shahikbalahmed  staff  12  3 Jul 23:28 symlink.txt -> original.txt
+
+File: original.txt | Inode: 42844877 | Links: 2 | Size: 29
+File: hardlink.txt | Inode: 42844877 | Links: 2 | Size: 29
+File: symlink.txt | Inode: 42844880 | Links: 1 | Size: 12
+
+=== READING ALL LINKS ===
+original: Original project source file
+hardlink: Original project source file
+symlink: Original project source file
+
+=== DELETING ORIGINAL ===
+total 16
+42844877 -rw-r--r--@ 1 shahikbalahmed  staff   29  3 Jul 23:28 hardlink.txt
+42844881 -rw-r--r--@ 1 shahikbalahmed  staff  700  3 Jul 23:28 link_experiment.log
+42844880 lrwxr-xr-x@ 1 shahikbalahmed  staff   12  3 Jul 23:28 symlink.txt -> original.txt
+
+hardlink after delete: Original project source file
+symlink after delete: cat: symlink.txt: No such file or directory
+original.txt

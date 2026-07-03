@@ -1,0 +1,6 @@
+diskutil list
+mount
+df -h
+df -i
+vi Storage_Assessment_Report.txt
+cat Storage_Assessment_Report.txt

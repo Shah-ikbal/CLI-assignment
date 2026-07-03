@@ -1,0 +1,137 @@
+================================================================
+    QUESTION 2 – SECURE PROJECT WORKSPACE SETUP REPORT
+    Date: July 3, 2026
+    User: shahikbalahmed
+================================================================
+
+----------------------------------------------------------------
+COMMAND 1: mkdir -p secure_project/{docs,src,config,backups}
+----------------------------------------------------------------
+$ mkdir -p secure_project/{docs,src,config,backups}
+
+EXPLANATION:
+This command creates a nested directory structure in one step using
+brace expansion. Four subdirectories (docs, src, config, backups)
+were created under secure_project for organizing project files by
+purpose.
+
+----------------------------------------------------------------
+COMMAND 2: ls -la secure_project (BEFORE permission changes)
+----------------------------------------------------------------
+$ ls -la secure_project
+total 0
+drwxr-xr-x@ 6 shahikbalahmed  staff  192  3 Jul 23:27 .
+drwxr-xr-x@ 4 shahikbalahmed  staff  128  3 Jul 23:27 ..
+drwxr-xr-x@ 2 shahikbalahmed  staff   64  3 Jul 23:27 backups
+drwxr-xr-x@ 2 shahikbalahmed  staff   64  3 Jul 23:27 config
+drwxr-xr-x@ 2 shahikbalahmed  staff   64  3 Jul 23:27 docs
+drwxr-xr-x@ 2 shahikbalahmed  staff   64  3 Jul 23:27 src
+
+EXPLANATION:
+Before modification, all directories had default permissions 755
+(rwxr-xr-x), meaning any user on the system could read and enter
+these directories. This is too permissive for a secure workspace.
+
+----------------------------------------------------------------
+COMMAND 3: Create sample project files
+----------------------------------------------------------------
+$ echo "Project documentation - confidential" > secure_project/docs/readme.txt
+$ echo "source code placeholder" > secure_project/src/app.sh
+$ echo "config settings" > secure_project/config/settings.conf
+
+EXPLANATION:
+Sample files were placed in docs, src, and config directories to
+demonstrate how file-level permissions differ from directory
+permissions in protecting sensitive project data.
+
+----------------------------------------------------------------
+COMMAND 4: Apply secure permissions
+----------------------------------------------------------------
+$ chmod 700 secure_project
+$ chmod 750 secure_project/docs secure_project/src
+$ chmod 640 secure_project/docs/readme.txt secure_project/config/settings.conf
+$ chmod 750 secure_project/config secure_project/backups
+$ chmod 750 secure_project/src/app.sh
+
+EXPLANATION:
+Permissions were tightened using chmod. The root directory is now
+700 (owner-only access). Subdirectories are 750 (owner full, group
+read/execute). Sensitive files are 640 (owner read/write, group
+read only). The executable script app.sh is 750.
+
+----------------------------------------------------------------
+COMMAND 5: ls -la secure_project (AFTER permission changes)
+----------------------------------------------------------------
+$ ls -la secure_project
+total 0
+drwx------@ 6 shahikbalahmed  staff  192  3 Jul 23:27 .
+drwxr-xr-x@ 4 shahikbalahmed  staff  128  3 Jul 23:27 ..
+drwxr-x---@ 2 shahikbalahmed  staff   64  3 Jul 23:27 backups
+drwxr-x---@ 3 shahikbalahmed  staff   96  3 Jul 23:27 config
+drwxr-x---@ 3 shahikbalahmed  staff   96  3 Jul 23:27 docs
+drwxr-x---@ 3 shahikbalahmed  staff   96  3 Jul 23:27 src
+
+secure_project/docs/readme.txt    → -rw-r----- (640)
+secure_project/config/settings.conf → -rw-r----- (640)
+secure_project/src/app.sh       → -rwxr-x--- (750)
+
+EXPLANATION:
+After chmod, the root secure_project directory shows drwx------ (700),
+blocking all non-owner access. Files inside show restricted permissions
+where others have no access at all, protecting confidential data.
+
+----------------------------------------------------------------
+COMMAND 6: ls -ln (Ownership details)
+----------------------------------------------------------------
+$ ls -ln secure_project
+drwxr-x---@ 2 501  20  64  backups
+drwxr-x---@ 3 501  20  96  config
+drwxr-x---@ 3 501  20  96  docs
+drwxr-x---@ 3 501  20  96  src
+
+EXPLANATION:
+The ls -ln command shows numeric UID (501) and GID (20 = staff).
+All directories are owned by shahikbalahmed:staff, ensuring only
+the project owner and staff group members have defined access.
+
+----------------------------------------------------------------
+COMMAND 7: umask
+----------------------------------------------------------------
+$ umask
+022
+
+EXPLANATION:
+The umask value 022 means new files are created without write
+permission for group and others (default file: 644, directory: 755).
+We explicitly used chmod because umask alone does not produce the
+stricter 700/750/640 permissions required for this secure workspace.
+
+----------------------------------------------------------------
+HOW PERMISSIONS PROTECT PROJECT DATA
+----------------------------------------------------------------
+1. Directory 700 on secure_project: Only the owner can enter the
+   workspace at all — outsiders cannot even list its contents.
+2. Directory 750 on subdirs: Group members can browse but not modify
+   structure; others are completely blocked.
+3. File 640 on docs/config: Confidential files are readable only
+   by owner and group, never by other system users.
+4. File 750 on app.sh: Only owner can write; group can execute but
+   not modify the script, preventing unauthorized code changes.
+5. Principle of least privilege: Each resource has the minimum
+   permissions needed, reducing attack surface and data leakage risk.
+
+================================================================
+DIRECTORY STRUCTURE CREATED
+================================================================
+secure_project/
+├── docs/
+│   └── readme.txt          (640 - confidential documentation)
+├── src/
+│   └── app.sh              (750 - executable source script)
+├── config/
+│   └── settings.conf       (640 - configuration file)
+└── backups/                (750 - backup storage)
+
+================================================================
+END OF REPORT
+================================================================
